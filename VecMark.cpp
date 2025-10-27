@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
 
     VecMarkRun(InputFileName, OutputFileName);
 
-    cout<<"Compile "<<InputFileName<<" to "<<OutputFileName<<" success !"<<endl;
+    cout<<"Compile \""<<InputFileName<<"\" to \""<<OutputFileName<<"\" success :)"<<endl;
 
     return 0;
 }
@@ -29,7 +29,7 @@ void VecMarkRun(string InputFileName, string OutputFileName) {
     if(!InputFile.is_open())
         Error("Input file is not exist");
 
-    ofstream OutputFile("XXX"  + OutputFileName);
+    ofstream OutputFile(OutputFileName);
     if(!OutputFile.is_open())
         Error("Create output file fail");
 
@@ -61,6 +61,8 @@ string Compile(vector<string>& AllText) {
     string AllHTML;
     bool InEmptyLine = false;
 
+    Write(AllHTML, CSSFrontStr);
+
     // Look each line text
     for(size_t CurrentIndex=0; CurrentIndex<AllText.size();) {
         string LineText = AllText[CurrentIndex];
@@ -68,7 +70,7 @@ string Compile(vector<string>& AllText) {
         // Empty
         if(LineText=="") {
             if(!InEmptyLine) {
-                WriteBack(AllHTML, "<br>\n");
+                Write(AllHTML, "<br>\n");
                 InEmptyLine = true;
             }
             CurrentIndex++;
@@ -80,48 +82,50 @@ string Compile(vector<string>& AllText) {
             
             // Headline
             if(LineHead == '#') {
-                WriteBack(AllHTML, CompileHeadLine(LineText));
+                Write(AllHTML, CompileHeadLine(LineText));
                 CurrentIndex++;
             // Crossline
             } else if(LineText=="___" || LineText=="---" || LineText=="***") {
-                WriteBack(AllHTML, "<hr>");
+                Write(AllHTML, "<hr>");
                 CurrentIndex++;
             // Unordered list
             } else if(LineHead=='*' || LineHead=='+' || LineHead=='-') {
-                WriteBack(AllHTML, CompileUnorderedList(LineText));
+                Write(AllHTML, CompileUnorderedList(LineText));
                 CurrentIndex++;
             // Ordered list
             } else if(isdigit(LineHead)) {
-                WriteBack(AllHTML, CompileOrderedList(AllText, CurrentIndex));
+                Write(AllHTML, CompileOrderedList(AllText, CurrentIndex));
             // Image
             } else if(LineHead=='!') {
-                WriteBack(AllHTML, CompileImage(LineText));
+                Write(AllHTML, CompileImage(LineText));
                 CurrentIndex++;
             // Link
             } else if(LineHead=='[') {
-                WriteBack(AllHTML, CompileLink(LineText));
+                Write(AllHTML, CompileLink(LineText));
                 CurrentIndex++;
             // Reference
             } else if(LineHead=='>') {
-                WriteBack(AllHTML, CompileReference(LineText));
+                Write(AllHTML, CompileReference(LineText));
                 CurrentIndex++;
             // Codeblcok
             } else if(LineText=="```") {
-                WriteBack(AllHTML, CompileCodeBlock(AllText, CurrentIndex));
+                Write(AllHTML, CompileCodeBlock(AllText, CurrentIndex));
             // EmbedHTML
             } else if(LineText=="<<") {
-                WriteBack(AllHTML, CompileEmbedHTML(AllText, CurrentIndex));
+                Write(AllHTML, CompileEmbedHTML(AllText, CurrentIndex));
             // Normalline
             } else {
-                WriteBack(AllHTML, "<p>");
-                WriteBack(AllHTML, CompileNormalLine(LineText));
-                WriteBack(AllHTML, "</p>");
+                Write(AllHTML, "<p>");
+                Write(AllHTML, CompileNormalLine(LineText));
+                Write(AllHTML, "</p>");
                 CurrentIndex++;
             }
 
-            WriteBack(AllHTML, "\n");
+            Write(AllHTML, "\n");
         }
     }
+
+    Write(AllHTML, CSSBackStr);
     
     return AllHTML;
 }
@@ -145,17 +149,18 @@ string CompileNormalLine(string& LineText)
             while(I<LineText.size() && LineText[I]!='*') I++;
             // **...**...
             if(I+1<LineText.size() && LineText[I+1]=='*') {
+                //Use 'Divide and Conquer'
                 string LeftText = LineText.substr(2,I-2);
                 I += 2;
                 string RightText = LineText.substr(I,LineText.size()-I); 
-                WriteBack(NormalLineHTML, "<strong>");
-                WriteBack(NormalLineHTML, CompileNormalLine(LeftText));
-                WriteBack(NormalLineHTML, "</strong>");
-                WriteBack(NormalLineHTML, CompileNormalLine(RightText));
+                Write(NormalLineHTML, "<strong>");
+                Write(NormalLineHTML, CompileNormalLine(LeftText));
+                Write(NormalLineHTML, "</strong>");
+                Write(NormalLineHTML, CompileNormalLine(RightText));
             } else {
                 string RemainText = LineText.substr(1,LineText.size()-1);
-                WriteBack(NormalLineHTML, "*");
-                WriteBack(NormalLineHTML, CompileNormalLine(RemainText));
+                Write(NormalLineHTML, "*");
+                Write(NormalLineHTML, CompileNormalLine(RemainText));
             }
         // *... 
         } else {
@@ -166,14 +171,14 @@ string CompileNormalLine(string& LineText)
                 string LeftText = LineText.substr(1,I-1);
                 I++;
                 string RightText = LineText.substr(I,LineText.size()-I);
-                WriteBack(NormalLineHTML, "<em>");
-                WriteBack(NormalLineHTML, CompileNormalLine(LeftText));
-                WriteBack(NormalLineHTML, "</em>");
-                WriteBack(NormalLineHTML, CompileNormalLine(RightText));
+                Write(NormalLineHTML, "<em>");
+                Write(NormalLineHTML, CompileNormalLine(LeftText));
+                Write(NormalLineHTML, "</em>");
+                Write(NormalLineHTML, CompileNormalLine(RightText));
             } else {
                 string RemainText = LineText.substr(1,LineText.size()-1);
-                WriteBack(NormalLineHTML, "*");
-                WriteBack(NormalLineHTML, CompileNormalLine(RemainText));
+                Write(NormalLineHTML, "*");
+                Write(NormalLineHTML, CompileNormalLine(RemainText));
             }
         }
 
@@ -188,14 +193,14 @@ string CompileNormalLine(string& LineText)
                 string LeftText = LineText.substr(2,I-2);
                 I += 2;
                 string RightText = LineText.substr(I,LineText.size()-I); 
-                WriteBack(NormalLineHTML, "<strong>");
-                WriteBack(NormalLineHTML, CompileNormalLine(LeftText));
-                WriteBack(NormalLineHTML, "</strong>");
-                WriteBack(NormalLineHTML, CompileNormalLine(RightText));
+                Write(NormalLineHTML, "<strong>");
+                Write(NormalLineHTML, CompileNormalLine(LeftText));
+                Write(NormalLineHTML, "</strong>");
+                Write(NormalLineHTML, CompileNormalLine(RightText));
             } else {
                 string RemainText = LineText.substr(1,LineText.size()-1);
-                WriteBack(NormalLineHTML, "_");
-                WriteBack(NormalLineHTML, CompileNormalLine(RemainText));
+                Write(NormalLineHTML, "_");
+                Write(NormalLineHTML, CompileNormalLine(RemainText));
             }
         // _... 
         } else {
@@ -206,14 +211,14 @@ string CompileNormalLine(string& LineText)
                 string LeftText = LineText.substr(1,I-1);
                 I++;
                 string RightText = LineText.substr(I,LineText.size()-I);
-                WriteBack(NormalLineHTML, "<em>");
-                WriteBack(NormalLineHTML, CompileNormalLine(LeftText));
-                WriteBack(NormalLineHTML, "</em>");
-                WriteBack(NormalLineHTML, CompileNormalLine(RightText));
+                Write(NormalLineHTML, "<em>");
+                Write(NormalLineHTML, CompileNormalLine(LeftText));
+                Write(NormalLineHTML, "</em>");
+                Write(NormalLineHTML, CompileNormalLine(RightText));
             } else {
                 string RemainText = LineText.substr(1,LineText.size()-1);
-                WriteBack(NormalLineHTML, "_");
-                WriteBack(NormalLineHTML, CompileNormalLine(RemainText));
+                Write(NormalLineHTML, "_");
+                Write(NormalLineHTML, CompileNormalLine(RemainText));
             }
         }
 
@@ -228,20 +233,20 @@ string CompileNormalLine(string& LineText)
                 string LeftText = LineText.substr(2,I-2);
                 I += 2;
                 string RightText = LineText.substr(I,LineText.size()-I); 
-                WriteBack(NormalLineHTML, "<s>");
-                WriteBack(NormalLineHTML, CompileNormalLine(LeftText));
-                WriteBack(NormalLineHTML, "</s>");
-                WriteBack(NormalLineHTML, CompileNormalLine(RightText));
+                Write(NormalLineHTML, "<s>");
+                Write(NormalLineHTML, CompileNormalLine(LeftText));
+                Write(NormalLineHTML, "</s>");
+                Write(NormalLineHTML, CompileNormalLine(RightText));
             } else {
                 string RemainText = LineText.substr(1,LineText.size()-1);
-                WriteBack(NormalLineHTML, "~");
-                WriteBack(NormalLineHTML, CompileNormalLine(RemainText));
+                Write(NormalLineHTML, "~");
+                Write(NormalLineHTML, CompileNormalLine(RemainText));
             }
         // ~...
         } else {
             string RemainText = LineText.substr(1,LineText.size()-1);
-            WriteBack(NormalLineHTML, "~");
-            WriteBack(NormalLineHTML, CompileNormalLine(RemainText));
+            Write(NormalLineHTML, "~");
+            Write(NormalLineHTML, CompileNormalLine(RemainText));
         }
 
     // CodeText
@@ -252,14 +257,14 @@ string CompileNormalLine(string& LineText)
             string LeftText = LineText.substr(1,I-1);
             I++;
             string RightText = LineText.substr(I,LineText.size()-I);
-            WriteBack(NormalLineHTML, "<code>");
-            WriteBack(NormalLineHTML, CompileNormalLine(LeftText));
-            WriteBack(NormalLineHTML, "</code>");
-            WriteBack(NormalLineHTML, CompileNormalLine(RightText));
+            Write(NormalLineHTML, "<code>");
+            Write(NormalLineHTML, CompileNormalLine(LeftText));
+            Write(NormalLineHTML, "</code>");
+            Write(NormalLineHTML, CompileNormalLine(RightText));
         } else {
             string RemainText = LineText.substr(1,LineText.size()-1);
-            WriteBack(NormalLineHTML, "`");
-            WriteBack(NormalLineHTML, CompileNormalLine(RemainText));
+            Write(NormalLineHTML, "`");
+            Write(NormalLineHTML, CompileNormalLine(RemainText));
         }
         
     // Word
@@ -268,8 +273,8 @@ string CompileNormalLine(string& LineText)
         while(I<LineText.size() && !IsSpecial(LineText[I])) I++;
         string LeftText = LineText.substr(0,I);
         string RightText = LineText.substr(I,LineText.size()-I);
-        WriteBack(NormalLineHTML, LeftText);
-        WriteBack(NormalLineHTML, CompileNormalLine(RightText));
+        Write(NormalLineHTML, LeftText);
+        Write(NormalLineHTML, CompileNormalLine(RightText));
     }
 
     return NormalLineHTML;
@@ -287,13 +292,13 @@ string CompileHeadLine(string& LineText) {
 
     if(I<LineText.size() && LineText[I]==' ' && HeadLineLevel<=6) {
         string HeadLineLevelStr = to_string(HeadLineLevel);
-        WriteBack(HeadLineHTML, "<h"+HeadLineLevelStr+">");
+        Write(HeadLineHTML, "<h"+HeadLineLevelStr+">");
 
         string NormalLineText = LineText.substr(I+1,LineText.size()-(I+1));
-        WriteBack(HeadLineHTML, CompileNormalLine(NormalLineText));
+        Write(HeadLineHTML, CompileNormalLine(NormalLineText));
         
-        WriteBack(HeadLineHTML, "</h"+HeadLineLevelStr+">");
-    } else WriteBack(HeadLineHTML, CompileNormalLine(LineText));
+        Write(HeadLineHTML, "</h"+HeadLineLevelStr+">");
+    } else Write(HeadLineHTML, CompileNormalLine(LineText));
 
     return HeadLineHTML;
 }
@@ -302,13 +307,13 @@ string CompileUnorderedList(string& LineText) {
     string ListHTML;
 
     if(LineText.size()>1 && LineText[1]==' ') {
-        WriteBack(ListHTML, "<ul>\n<li>");
+        Write(ListHTML, "<ul>\n<li>");
         
         string NormalLineText = LineText.substr(2,LineText.size()-2);
-        WriteBack(ListHTML, CompileNormalLine(NormalLineText));
+        Write(ListHTML, CompileNormalLine(NormalLineText));
 
-        WriteBack(ListHTML, "</li>\n</ul>");
-    } else WriteBack(ListHTML, CompileNormalLine(LineText));
+        Write(ListHTML, "</li>\n</ul>");
+    } else Write(ListHTML, CompileNormalLine(LineText));
 
     return ListHTML;
 }
@@ -343,17 +348,17 @@ string CompileOrderedList(vector<string>& AllText, size_t& CurrentIndex) {
     }
 
     if(!ListText.empty()) {
-        WriteBack(ListHTML, "<ol>\n");
+        Write(ListHTML, "<ol>\n");
         for(string& text:ListText)
-            WriteBack(ListHTML, "<li>"+text+"</li>\n");
-        WriteBack(ListHTML, "</ol>");
+            Write(ListHTML, "<li>"+text+"</li>\n");
+        Write(ListHTML, "</ol>");
 
         if(I<AllText.size()) 
-            WriteBack(ListHTML, "\n");
+            Write(ListHTML, "\n");
     }
 
     if(I<AllText.size()) 
-        WriteBack(ListHTML, CompileNormalLine(AllText[I]));
+        Write(ListHTML, CompileNormalLine(AllText[I]));
     
     CurrentIndex = I+1;
     return ListHTML;
@@ -386,10 +391,10 @@ string CompileImage(string& LineText) {
         return CompileNormalLine(LineText);
     ImageSrc = LineText.substr(Begin,End-Begin);
 
-    WriteBack(ImageHTML, "<img");
-    WriteBack(ImageHTML, " src=\""+ImageSrc+"\"");
-    WriteBack(ImageHTML, " alt=\""+ImageAlt+"\"");
-    WriteBack(ImageHTML, ">");
+    Write(ImageHTML, "<img");
+    Write(ImageHTML, " src=\""+ImageSrc+"\"");
+    Write(ImageHTML, " alt=\""+ImageAlt+"\"");
+    Write(ImageHTML, ">");
 
     return ImageHTML;
 }
@@ -417,9 +422,9 @@ string CompileLink(string& LineText) {
         return CompileNormalLine(LineText);
     LinkHref = LineText.substr(Begin,End-Begin);
     
-    WriteBack(LinkHTML, "<a href=\""+LinkHref+"\">");
-    WriteBack(LinkHTML, LinkText);
-    WriteBack(LinkHTML, "</a>");
+    Write(LinkHTML, "<a href=\""+LinkHref+"\">");
+    Write(LinkHTML, LinkText);
+    Write(LinkHTML, "</a>");
 
     return LinkHTML;
 }
@@ -428,13 +433,13 @@ string CompileReference(string& LineText) {
     string ReferenceHTML;
 
     if(LineText.size()>1 && LineText[1]==' ') {
-        WriteBack(ReferenceHTML, "<blockquote>");
+        Write(ReferenceHTML, "<blockquote>");
 
         string NormalLineText = LineText.substr(2,LineText.size()-2);
-        WriteBack(ReferenceHTML, CompileNormalLine(NormalLineText));
+        Write(ReferenceHTML, CompileNormalLine(NormalLineText));
 
-        WriteBack(ReferenceHTML, "</blockquote>");
-    } else WriteBack(ReferenceHTML, CompileNormalLine(LineText));
+        Write(ReferenceHTML, "</blockquote>");
+    } else Write(ReferenceHTML, CompileNormalLine(LineText));
 
     return ReferenceHTML;
 }
@@ -450,12 +455,12 @@ string CompileCodeBlock(vector<string>& AllText, size_t& CurrentIndex) {
     }
 
     if(I<AllText.size() && AllText[I]=="```") {
-        WriteBack(CodeBlcokHTML, "<pre><code>");
-        WriteBack(CodeBlcokHTML, CodeText);
-        WriteBack(CodeBlcokHTML, "</code></pre>");
+        Write(CodeBlcokHTML, "<pre><code>");
+        Write(CodeBlcokHTML, CodeText);
+        Write(CodeBlcokHTML, "</code></pre>");
         CurrentIndex = I+1;
     } else {
-        WriteBack(CodeBlcokHTML, "```");
+        Write(CodeBlcokHTML, "```");
         CurrentIndex++;
     }
 
@@ -486,14 +491,10 @@ string CompileEmbedHTML(vector<string>& AllText, size_t& CurrentIndex) {
 
 // Help
 void Error(string Message) {
-    cout<<"[ERROR] "<<Message<<endl;
+    cout<<"ERROR! "<<Message<<endl;
     exit(-1);
 }
 
-void WriteFront(string& Target, string Text) {
-    Target = Text + Target;
-}
-
-void WriteBack(string& Target, string Text) {
-    Target = Target + Text;
+void Write(string& Target, string Text) {
+    Target += Text;
 }

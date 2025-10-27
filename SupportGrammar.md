@@ -1,9 +1,6 @@
 标题
 
-
-
-
-# 一级*标*题
+# 一级标题
 ## 二级标题
 ### 三级标题
 #### 四级标题
@@ -31,19 +28,14 @@ ___
 无序列表
 
 - XXX
-* Y*Y*Y
-+ZZZ 
-        
+* YYY
++ ZZZ 
+
 有序列表
 
 1. AAA
 2. BBB
-   
-x
-
-
-1. CCC
-
+3. CCC
 
 图片
 
@@ -63,12 +55,11 @@ x
 int sum(int a,int b){
     return a+b;
 }
-
 ```
 
 HTML嵌入
 <<
-<div class="warning" style="border: 1px solid red; padding: 10px;">
-  <strong>警告：</strong>这是HTML内容！
+<div class="warning" style="border: 3px solid red; padding: 10px;">
+  <strong>警告：</strong><em>这是HTML内容！</em>
 </div>
 >>
